@@ -1,0 +1,2 @@
+Node 22: 42
+Node 22: radioEnergy: 0, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 19993496180

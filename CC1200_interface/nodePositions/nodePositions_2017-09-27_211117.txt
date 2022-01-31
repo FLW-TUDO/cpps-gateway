@@ -1,0 +1,1 @@
+Node 14: radioEnergy: 236050328554, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 26835363712

@@ -1,0 +1,4 @@
+Node 15: 121
+Node 15: radioEnergy: 1123563239150, memsEnergy: 532913137, lightEnergy: 198378098, cpuEnergy: 39330681760
+Node 16: 233
+Node 16: radioEnergy: 1123558515554, memsEnergy: 532913113, lightEnergy: 198378482, cpuEnergy: 39357964112

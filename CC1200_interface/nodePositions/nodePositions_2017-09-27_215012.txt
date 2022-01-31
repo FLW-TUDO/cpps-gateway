@@ -1,0 +1,2 @@
+Node 15: radioEnergy: 0, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 207093324
+Node 16: radioEnergy: 0, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 207085324

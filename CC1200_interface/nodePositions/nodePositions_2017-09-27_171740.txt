@@ -1,0 +1,3 @@
+Node 1: radioEnergy: 0, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 359984987600
+Node 4: 242
+Node 4: radioEnergy: 31958310442, memsEnergy: 0, lightEnergy: 7756858, cpuEnergy: 347599351732

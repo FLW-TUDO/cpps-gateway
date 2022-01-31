@@ -1,0 +1,2 @@
+Node 10: 213
+Node 10: radioEnergy: 33146220054, memsEnergy: 23954838, lightEnergy: 11561458, cpuEnergy: 345914645536

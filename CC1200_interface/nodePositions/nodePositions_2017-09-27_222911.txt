@@ -1,0 +1,10 @@
+Node 4: 113
+Node 4: radioEnergy: 31958385186, memsEnergy: 0, lightEnergy: 7756814, cpuEnergy: 1813594192
+Node 9: 243
+Node 9: radioEnergy: 29501017534, memsEnergy: 24320862, lightEnergy: 11506122, cpuEnergy: 3604901872
+Node 10: 213
+Node 10: radioEnergy: 33133652378, memsEnergy: 23954802, lightEnergy: 11561446, cpuEnergy: 345914661528
+Node 14: 212
+Node 14: radioEnergy: 138294953682, memsEnergy: 0, lightEnergy: 6491578, cpuEnergy: 293155478092
+Node 15: 151
+Node 15: radioEnergy: 1123530091942, memsEnergy: 532882033, lightEnergy: 198358094, cpuEnergy: 39330111668

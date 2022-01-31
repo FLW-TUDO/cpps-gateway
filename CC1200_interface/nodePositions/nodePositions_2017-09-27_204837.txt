@@ -1,0 +1,3 @@
+Node 10: 213
+Node 10: radioEnergy: 33122189314, memsEnergy: 23952642, lightEnergy: 11560726, cpuEnergy: 37920873700
+Node 14: radioEnergy: 118246145276, memsEnergy: 0, lightEnergy: 0, cpuEnergy: 3559283504

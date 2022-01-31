@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbeitsstationsverwaltung</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+</head>
+<body>
+    <h1>Arbeitsstationsverwaltung</h1>
+    <h2>Arbeitsstationen:</h2>
+    <div id="button-overview"></div>
+    <h2>Zeitslots:</h2>
+    <div class="time-slots" id="time-slot-overview"></div>
+</body>
+<script>
+    window.onload = loadButtons();
+</script>
+</html>

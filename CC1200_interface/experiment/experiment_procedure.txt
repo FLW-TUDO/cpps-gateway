@@ -1,0 +1,18 @@
+All Phynodes are in receive mode.
+The Gateway then sends a specific byte sequence for synchronisation: {7, 0x55, 0x10, 0x55, 0x10, 0x00}.
+The PhyNodes are listening for this specific sequence, if anything else is received, they just keep listening.
+Once the sync sequence is received, the PhyNodes start gathering and sending data. 
+Each node collects and sends data roughly each second.
+Time-devision multiplexing is used. The time a node sends the data depends on its ID (node 1 sends the data first, then node 2 ...).
+The data from all sensors is send in JSON format as a string.
+
+After sending the sync sequence the gateway goes into receive mode. 
+All data that is received is then saved into a logfile together with a timestamp and the RSSI.
+
+The gateway can have up to 4 transcievers which can be used at the same time.
+
+Usage: ./SFBGateway.app [-1 <channel>] [-2 <channel>] [-3 <channel>] [-4 <channel>] [-f <filename>] [-s]
+        <channel>: 0-17
+        -f <filename>: logfile name. Module name and ending will be added automatically (e.g. <filename>_M1.txt)
+        -s: Single logfile. Don't use seperate logfiles for each module.
+        -h: Show this help.

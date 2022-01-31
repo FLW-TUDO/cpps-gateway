@@ -1,0 +1,38 @@
+Radio protocol
+----------------
+
+A ping is a packet with 5 bytes of payload:
+The string "PING" (4 bytes) + the id of the node that send the ping (1 byte).
+The gateway will respond to a PING by sending a PONG (packet with payload "PONG") after roughly 25ms. The PONG will only be send to the node that sent the PING.
+
+For the "Getting Started" examples:
+
+All 3 gateways will send out beacons periodically. The order is always beacon 1 --> beacon 2 --> beacon 3.
+A beacon always consists of the payload "BEACON_n", where n is the number of the gateway that sent the beacon.
+So if you receive a packet with payload "BEACON_1", you know that this packet was sent by gateway 1.
+
+Beacon 1 can also contain the sensor data from the 2 reference boards. If it does, the payload length for that packet is strlen("BEACON_1") + 2*sizeof(PositionPacket) 
+(see Summerschool.h for the definition of PositionPacket) and the payload consists of the regular BEACON string and 2 PositionPackets containing the data from the reference boards.
+
+
+For the position prediction exercise:
+
+The Summerschool app will take care of all the relevant steps to setup the system, execute your code and send the position you set with summerschoolThread.setPosition() back to the gateway once the time is up.
+
+The communication between the gateways and the PhyNodes is as follows:
+
+There are 3 gateways. When the exercise is started, gateway 1 will send out a START signal that also contains the time for that exercise.
+Once a PhyNode receives this START signal, it will execute the user code (SummerschoolUserThread::calculatePosition()), which is where you have to implemnet your model and predict the position of your PhyNode.
+To find out how much time is left you can use summerschoolThread.getRemainingTime(), which will give you the remaining time in seconds.
+The gateways will continue to send out beacons for the duration of the exercise. You can use them to get the RSSI if you need it to calculate the position of your node.
+Once the time is up, the thread executing your code will be killed and then the position you set and the amount of energy you used during the exercise will be send to the gateway.
+
+
+
+
+
+nodeData.h erwähnen
+Aufgabe umschreiben, payload ausgeben (BEACON)
+lightsensor wait
+
+

@@ -1,0 +1,12 @@
+Node 4: 241
+Node 4: radioEnergy: 31958359450, memsEnergy: 0, lightEnergy: 7756402, cpuEnergy: 1813306336
+Node 9: 141
+Node 9: radioEnergy: 29501030094, memsEnergy: 24320886, lightEnergy: 11506130, cpuEnergy: 3604893876
+Node 10: 213
+Node 10: radioEnergy: 33148224006, memsEnergy: 23954790, lightEnergy: 11561442, cpuEnergy: 345914661528
+Node 14: 223
+Node 14: radioEnergy: 138294953682, memsEnergy: 0, lightEnergy: 6491582, cpuEnergy: 293155454108
+Node 15: 153
+Node 15: radioEnergy: 1123563173270, memsEnergy: 532913137, lightEnergy: 198378098, cpuEnergy: 39330393904
+Node 16: 113
+Node 16: radioEnergy: 1123558390382, memsEnergy: 532913113, lightEnergy: 198378490, cpuEnergy: 39356692748

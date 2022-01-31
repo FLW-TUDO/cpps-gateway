@@ -1,0 +1,11 @@
+pymongo
+numpy
+Flask
+threading
+configparser
+time
+firebase-admin
+requests
+json
+paho-mqtt
+six

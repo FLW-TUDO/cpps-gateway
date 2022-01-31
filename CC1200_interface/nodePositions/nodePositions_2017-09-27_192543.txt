@@ -1,0 +1,2 @@
+Node 9: 252
+Node 9: radioEnergy: 29509717314, memsEnergy: 0, lightEnergy: 11507946, cpuEnergy: 1931767632

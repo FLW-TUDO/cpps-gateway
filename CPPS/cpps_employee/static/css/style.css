@@ -1,0 +1,32 @@
+.time-slots  {
+    margin: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.time-slot {
+    background-color: greenyellow;
+    margin-bottom: 2px;
+    height: 13px;
+    border: 1px solid darkgray;
+    border-radius: 2px;
+}
+.title {
+    width: 80px;
+    font-size: smaller;
+}
+.info {
+    margin-left: 5px;
+    font-size: smaller;
+    color: darkgray;
+}
+.distance {
+    border: none;
+    background: transparent;
+}
+hr {
+    border: 0.5px dotted darkgray;
+}
+
+#button-overview {
+    padding: 1em;
+}
