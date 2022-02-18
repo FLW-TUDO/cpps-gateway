@@ -51,7 +51,8 @@ mqttc.on_connect = on_connect
 connect_to_mqtt_broker()
 
 # APPacket
-module = gs_config.getint('module')
+# Only fallback option!
+# module = gs_config.getint('module')
 
 # Initialize dependency's
 preserver = Preserver(mqttc)
@@ -108,22 +109,32 @@ def becn():
     req_data = json.loads(request.data)
 
     if request.method == 'POST':
+    
+        addr = None
+        module = None
+        
         # If no data in body defined, abort.
         if req_data is None:
             return make_response(jsonify(FAILURE='No body defined'), 400)
 
         # If phyaddr not defined, abort.
-        if 'phyaddr' not in req_data:
-            return make_response(jsonify(FAILURE='No phyaddr defined. For example "phyaddr": 21'), 400)
+        if 'addr' not in req_data:
+            return make_response(jsonify(FAILURE='No addr defined. For example "addr": 21 (8bit)'), 400)
         else:
-            phyaddr = req_data['phyaddr']
+            addr = req_data['phyaddr']
 
-        payload = proto.create_beacon_request(addr=phyaddr)
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
+
+        payload = proto.create_beacon_request(addr=addr)
         try:
-            packet = APPacket(module, phyaddr, payload)
+            packet = APPacket(module, addr, payload)
             packet.send()
             return make_response(
-                jsonify(SUCCESS='BECN send on address: {:d}'.format(phyaddr)), 200
+                jsonify(SUCCESS='BECN send on address: {:d}'.format(addr)), 200
             )
         except Exception as err:
             return make_response(
@@ -153,7 +164,13 @@ def duid():
         payload = proto.create_duid_request(addr=addr)
         preserver.publish_information()
         try:
-            packet = APPacket(module, addr, payload)
+            packet = APPacket(1, addr, payload)
+            packet.send()
+            packet = APPacket(2, addr, payload)
+            packet.send()
+            packet = APPacket(3, addr, payload)
+            packet.send()
+            packet = APPacket(4, addr, payload)
             packet.send()
             return make_response(
                 jsonify(SUCCESS='DUID send on address: {:d}'.format(addr)), 200
@@ -179,7 +196,8 @@ def sadr():
     if request.method == 'POST':
         uid = None
         addr = None
-        phyaddr = None
+        newAddr = None
+        module = None
 
         # If no data in body defined, abort.
         if req_data is None:
@@ -187,24 +205,30 @@ def sadr():
 
         # If uid not defined, abort.
         if 'uid' not in req_data:
-            return make_response(jsonify(FAILURE='No phyaddr defined. For example "phyaddr": 21'), 400)
+            return make_response(jsonify(FAILURE='No uid defined. For example "uid": 21 (16bit)'), 400)
         else:
             uid = req_data['uid']
 
         # If phyaddr not defined, abort.
         if 'addr' not in req_data:
-            return make_response(jsonify(FAILURE='No destination addr defined. For example "addr": 170'), 400)
+            return make_response(jsonify(FAILURE='No destination addr defined. For example "addr": 170 (8bit)'), 400)
         else:
             addr = req_data['addr']
 
         # If new_phyaddr not defined, abort.
-        if 'phyaddr' not in req_data:
-            return make_response(jsonify(FAILURE='No phyaddr defined. For example "phyaddr": 21'), 400)
+        if 'newAddr' not in req_data:
+            return make_response(jsonify(FAILURE='No new Address defined. For example "newAddr": 21 (16bit)'), 400)
         else:
-            phyaddr = req_data['phyaddr']
+            newAddr = req_data['newAddr']
+
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
 
         seqnr = proto.get_seqnr()
-        payload = proto.create_sadr_request(addr=addr, uid=uid, newaddr=phyaddr)
+        payload = proto.create_sadr_request(addr=addr, uid=uid, newaddr=newAddr)
         try:
             packet = APPacket(module, addr, payload)
             packet.send()
@@ -233,6 +257,7 @@ def chnl():
 
     if request.method == 'POST':
         channel = None
+        module = None
 
         # If no data in body defined, abort.
         if req_data is None:
@@ -244,7 +269,14 @@ def chnl():
         else:
             channel = req_data['channel']
 
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
+
         seqnr = proto.get_seqnr()
+        # TODO: Why always addr=0? No possibility to only access phyNodes on spec. channel?
         payload = proto.create_chnl_request(addr=0, channel=channel)
         try:
             packet = APPacket(module, 0, payload)
@@ -273,6 +305,7 @@ def seti():
     if request.method == 'POST':
         addr = None
         itemdescr = None
+        module = None
         amount = 0
 
         # If no data in body defined, abort.
@@ -293,6 +326,12 @@ def seti():
             return make_response(jsonify(FAILURE='No itemdescr defined. For example "itemdescr": 1010'), 400)
         else:
             itemdescr = int(req_data['itemdescr'])
+
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
 
         if 'amount' not in req_data:
             return make_response(jsonify(FAILURE='No amount defined. For example "amout": 9'), 400)
@@ -319,12 +358,13 @@ def seti():
 
 
 # PING Q seq
-@app.route('/gateway/ping', methods=['POST'])
+@app.route('/gateway/PING', methods=['POST'])
 def ping():
     req_data = json.loads(request.data)
 
     if request.method == 'POST':
         addr = 0
+        module = None
 
         # If no data in body defined, abort.
         if req_data is None:
@@ -339,6 +379,12 @@ def ping():
                 return make_response(
                     jsonify(FAILURE='Address is out of range. Please select an address greater as 0!'), 400
                 )
+
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
 
         payload = proto.create_ping_request(0)
         try:
@@ -384,7 +430,13 @@ def poll():
         payload = proto.create_poll_request(addr, ordernumber, itemdescr)
         try:
             result = preserver.get_by_ordernumber(int(ordernumber))
-            packet = APPacket(module, addr, payload)
+            packet = APPacket(1, addr, payload)
+            packet.send()
+            packet = APPacket(2, addr, payload)
+            packet.send()
+            packet = APPacket(3, addr, payload)
+            packet.send()
+            packet = APPacket(4, addr, payload)
             packet.send()
         except Exception as err:
             return make_response(jsonify(FAILURE='{}'.format(err)), 400)
@@ -437,6 +489,7 @@ def enum():
 
     if request.method == 'POST':
         addr = 0
+        module = None
 
         # If no data in body defined, abort.
         if req_data is None:
@@ -448,6 +501,12 @@ def enum():
             addr = int(req_data['addr'])
             if addr < 0:
                 return make_response(jsonify(FAILURE='Address is smaller then 0'), 400)
+
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
 
         payload = proto.create_enum_request(addr=addr)
         try:
@@ -492,7 +551,13 @@ def rsto():
     elif request.method == 'DELETE':
         payload = proto.create_butn_request(addr=0, buttonid=1)
         try:
-            packet = APPacket(module, 0, payload)
+            packet = APPacket(1, 0, payload)
+            packet.send()
+            packet = APPacket(2, 0, payload)
+            packet.send()
+            packet = APPacket(3, 0, payload)
+            packet.send()
+            packet = APPacket(4, 0, payload)
             packet.send()
         except Exception as err:
             return make_response(jsonify(FAILURE='{}'.format(err)), 400)
@@ -516,27 +581,34 @@ def bats():
 
     if request.method == 'POST':
         energy = None
-        phyaddr = None
+        addr = None
+        module = None
 
         # Check if request have an json-body
         if req_data is None:
             return make_response(jsonify(FAILURE='No data received'), 400)
 
-        # Check if ordernumber is defined
+        # Check if energy is defined
         if 'energy' not in req_data:
             return make_response(jsonify(FAILURE='Energy is not defined!'), 400)
         else:
             energy = req_data['energy']
 
-        # Check if itemdescr is defined
-        if 'phyaddr' not in req_data:
-            return make_response(jsonify(FAILURE='Phyaddr is not defined!'), 400)
+        # Check if addr is defined
+        if 'addr' not in req_data:
+            return make_response(jsonify(FAILURE='addr is not defined!'), 400)
         else:
-            phyaddr = req_data['phyaddr']
+            addr = req_data['addr']
 
-        payload = proto.create_bats_request(phyaddr, energy)
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
+
+        payload = proto.create_bats_request(addr, energy)
         try:
-            packet = APPacket(module, phyaddr, payload)
+            packet = APPacket(module, addr, payload)
             packet.send()
             return make_response(jsonify(SUCCESSFULL='True'), 200)
         except Exception as err:
@@ -557,6 +629,7 @@ def butn():
 
     if request.method == 'POST':
         addr = 0
+        module = None
 
         # If no data in body defined, abort.
         if req_data is None:
@@ -573,6 +646,12 @@ def butn():
             return make_response(jsonify(FAILURE='No buttonId defined. For example "buttonId": 1'), 400)
         else:
             buttonId = int(req_data['buttonId'])
+
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
 
         payload = proto.create_butn_request(addr=addr, buttonid=buttonId)
         try:
@@ -622,8 +701,9 @@ def rsve():
     req_data = json.loads(request.data)
 
     if request.method == 'POST':
-        phyaddr = None
+        addr = None
         ordernumber = None
+        module = None
         amount = 0
 
         # If no data in body defined, abort.
@@ -631,11 +711,11 @@ def rsve():
             return make_response(jsonify(FAILURE='No body defined'), 400)
 
         # If addr not defined, abort
-        if 'phyaddr' not in req_data:
-            return make_response(jsonify(FAILURE='No addr defined. For example "addr": 170'), 400)
+        if 'addr' not in req_data:
+            return make_response(jsonify(FAILURE='No addr defined. For example "addr": 170(8bit)'), 400)
         else:
-            phyaddr = int(req_data['phyaddr'])
-            if phyaddr < 1:
+            addr = int(req_data['addr'])
+            if addr < 1:
                 return make_response(
                     jsonify(FAILURE='Address is out of range. Please select an address greater as 0!'), 400
                 )
@@ -650,30 +730,38 @@ def rsve():
         else:
             amount = req_data['amount']
 
-        preserver.rsve_by_phyaddr(phyaddr, ordernumber)
-        payload = proto.create_reserve_request(phyaddr, ordernumber, amount)
+        # If module not defined, abort.
+        if 'module' not in req_data:
+            return make_response(jsonify(FAILURE='No module (antenna) defined. For example "module": 2'), 400)
+        else:
+            module = req_data['module']
+
+        preserver.rsve_by_phyaddr(addr, ordernumber)
+        payload = proto.create_reserve_request(addr, ordernumber, amount)
         try:
-            packet = APPacket(module, phyaddr, payload)
+            packet = APPacket(module, addr, payload)
             packet.send()
             return make_response(
-                jsonify(SUCCESS='RSVE send on address: {:d}'.format(phyaddr)), 200
+                jsonify(SUCCESS='RSVE send on address: {:d}'.format(addr)), 200
             )
         except Exception as err:
             return make_response(jsonify(FAILURE='{}'.format(err)), 400)
 
-        time.sleep(1)
+        # Unreachable code
+        #time.sleep(1)
 
-        result = preserver.is_blocked(phyaddr)
-        if not result:
-            return make_response(jsonify(blocked=result), 400)
-        else:
-            return Response(jsonify(blocked=result), mimetype='application/json')
+        #result = preserver.is_blocked(phyaddr)
+        #if not result:
+        #    return make_response(jsonify(blocked=result), 400)
+        #else:
+        #    return Response(jsonify(blocked=result), mimetype='application/json')
 
 
 '''
 ############################################################
 '''
 
+# TODO: Why always 0?
 
 # RESE M phyaddr uid [energy]               (M mode)
 @app.route('/gateway/RESE', methods=['DELETE'])
@@ -681,7 +769,7 @@ def rese():
     if request.method == 'DELETE':
         payload = proto.create_butn_request(addr=0, buttonid=1)
         try:
-            packet = APPacket(module, 0, payload)
+            packet = APPacket(2, 0, payload)
             packet.send()
         except Exception as err:
             return make_response(jsonify(FAILURE='{}'.format(err)), 400)
