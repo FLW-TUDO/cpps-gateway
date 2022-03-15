@@ -155,6 +155,11 @@ def becn():
 #   >> DUID R seq uid phyaddr
 @app.route("/gateway/DUID", methods=["POST"])
 def duid():
+    seqnr_err = duid_c(request)
+    return duid_r(seqnr_err)
+
+
+def duid_c(request):
     req_data = json.loads(request.data)
 
     if request.method == "POST":
@@ -181,11 +186,17 @@ def duid():
         try:
             packet = APPacket(module, addr, payload)
             packet.send()
-            time.sleep(0.1)
-            reply = proto.get_by_seqnr(seqnr=seqnr)
-            return make_response(jsonify(ack=str(reply)), 200)
+            return seqnr
         except Exception as err:
-            return make_response(jsonify(FAILURE="{}".format(err)), 400)
+            return "{}".format(err)
+
+
+async def duid_r(seqnr_err):
+    if type(seqnr_err) == int:
+        reply = await proto.get_by_seqnr(seqnr=seqnr_err)
+        return make_response(jsonify(ack=str(reply)), 200)
+    else:
+        return make_response(jsonify(FAILURE=seqnr_err), 400)
 
 
 """
