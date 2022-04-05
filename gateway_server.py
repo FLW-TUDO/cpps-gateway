@@ -186,14 +186,15 @@ def duid_c(request):
         try:
             packet = APPacket(module, addr, payload)
             packet.send()
+            time.sleep(0.35)  # higher than needed (~.25), but just to be sure
             return seqnr
         except Exception as err:
             return "{}".format(err)
 
 
-async def duid_r(seqnr_err):
+def duid_r(seqnr_err):
     if type(seqnr_err) == int:
-        reply = await proto.get_by_seqnr(seqnr=seqnr_err)
+        reply = proto.get_by_seqnr(seqnr=seqnr_err - 1)
         return make_response(jsonify(ack=str(reply)), 200)
     else:
         return make_response(jsonify(FAILURE=seqnr_err), 400)
