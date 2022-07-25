@@ -154,7 +154,7 @@ void readFifoLoop(){
         blinkLED(0x00FF00, 100);
         break;
       case 3:
-        cc1200_m2.send(pkt.packet);
+        cc1200_m3.send(pkt.packet);
         blinkLED(0x00FF00, 100);
         break;
       case 4:

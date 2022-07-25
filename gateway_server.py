@@ -164,7 +164,7 @@ def duid_c(request):
 
     if request.method == "POST":
         addr = 0
-        module = None
+        modules = None
 
         # Check if request have an json-body and an address option.
         # If no option is defined, send to broadcast.
@@ -173,28 +173,28 @@ def duid_c(request):
 
         # If module not defined, abort.
         if "module" not in req_data:
-            return make_response(
-                jsonify(FAILURE='No module (antenna) defined. For example "module": 2'),
-                400,
-            )
+            modules = [1,2,3]
         else:
-            module = req_data["module"]
+            modules = [req_data["module"]]
 
         payload = proto.create_duid_request(addr=addr)
-        seqnr = proto.get_seqnr()
         # preserver.publish_information()
-        try:
-            packet = APPacket(module, addr, payload)
-            packet.send()
-            time.sleep(0.35)  # higher than needed (~.25), but just to be sure
-            return seqnr
-        except Exception as err:
-            return "{}".format(err)
+        for module in modules:
+            try:
+                packet = APPacket(module, addr, payload)
+                packet.send()
+                if addr == 0:
+                    time.sleep(2)
+                else:
+                    time.sleep(0.35)
+            except Exception as err:
+                return "{}".format(err)
+        return proto.get_seqnr()
 
 
 def duid_r(seqnr_err):
     if type(seqnr_err) == int:
-        reply = proto.get_by_seqnr(seqnr=seqnr_err - 1)
+        reply = proto.get_by_seqnr(seqnr=seqnr_err-1)
         return make_response(jsonify(ack=str(reply)), 200)
     else:
         return make_response(jsonify(FAILURE=seqnr_err), 400)
@@ -388,11 +388,13 @@ def seti():
         payload = proto.create_set_item_request(addr, itemdescr, amount)
         try:
             packet = APPacket(module, addr, payload)
+           # print(packet.pkt.payload)
             packet.send()
         except Exception as err:
             return make_response(jsonify(FAILURE="{}".format(err)), 400)
-        time.sleep(0.1)
+        time.sleep(1)
         reply = proto.get_by_seqnr(seqnr=seqnr)
+       # print('seti',type(reply))
         return make_response(jsonify(ack=str(reply)), 200)
 
 
@@ -471,40 +473,58 @@ def poll():
 
         # Check if ordernumber is defined
         if "ordernumber" not in req_data:
-            return make_response(jsonify(FAILURE="Ordernumber is not defined!"), 400)
+            return make_response(jsonify(FAILURE="ordernumber is not defined! (For Example 42)"), 400)
         else:
             ordernumber = req_data["ordernumber"]
 
         # Check if itemdescr is defined
         if "itemdescr" not in req_data:
-            return make_response(jsonify(FAILURE="Ordernumber is not defined!"), 400)
+            return make_response(jsonify(FAILURE="itemdescr is not defined! (For Example 2)"), 400)
         else:
             itemdescr = req_data["itemdescr"]
 
         payload = proto.create_poll_request(addr, ordernumber, itemdescr)
-        try:
-            result = preserver.get_by_ordernumber(int(ordernumber))
-            packet = APPacket(1, addr, payload)
-            packet.send()
-            packet = APPacket(2, addr, payload)
-            packet.send()
-            packet = APPacket(3, addr, payload)
-            packet.send()
-            packet = APPacket(4, addr, payload)
-            packet.send()
-        except Exception as err:
-            return make_response(jsonify(FAILURE="{}".format(err)), 400)
 
-        time.sleep(1)
+        final_response = []
+        
+        modules = [1,2,3]
 
-        result = preserver.get_by_ordernumber(int(ordernumber))
-        if len(result) == 0:
-            return make_response(
-                jsonify(FAILURE="No data from phynodes received!"), 400
-            )
+        for module in modules:
+            result = []
+            try:
+                result = preserver.get_by_ordernumber(int(ordernumber))
+                packet = APPacket(module, addr, payload)
+                packet.send()
+            
+            except Exception as err:
+                return make_response(jsonify(FAILURE="{}".format(err)), 400)
+
+            time.sleep(1)
+     
+           # result = preserver.get_by_ordernumber(int(ordernumber))
+            result = preserver.received_poll_messages
+             
+            if len(result) == 0:
+               print('module {} no data from phynodes received'.format(module))
+               # return make_response(
+               # jsonify(FAILURE="No data from phynodes received!"), 400)
+            else:
+                # This seems fishy. We only take the first entry of the list 
+                # provided in line 510?
+                # Also the get_by_ordernumber does not care about the module
+                # after sending the package we should be getting every PhyNode, 
+                # whatever module it has!
+                while result:
+                    final_response.append(result.pop())
+               # final_response.append(result)
+               # print('result',result)
+               # return Response(json.dumps(result), mimetype="application/json")
+        print(final_response)
+
+        if len(final_response) == 0:
+           return make_response(jsonify(FAILURE="No data from phynodes received!"), 400)
         else:
-            return Response(json.dumps(result), mimetype="application/json")
-
+           return Response(json.dumps(final_response), mimetype="application/json")
 
 """
 ############################################################

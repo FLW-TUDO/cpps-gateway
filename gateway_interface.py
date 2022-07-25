@@ -538,7 +538,7 @@ class LineReader:
                 seqnr = int(param[0])
                 duid = int(param[1])
                 phyaddr = int(param[2])
-                reply = {"uid": duid, "seqnr": seqnr}
+                reply = {"uid": duid, "addr": phyaddr}
                 self.proto.log_by_seqnr(seqnr=seqnr, reply=reply)
                 # self.stats.log_packet_by_seqnr(seqnr, 'rx')
                 # time.sleep(0.2)
@@ -1086,6 +1086,8 @@ class Preserver:
 
     def get_by_ordernumber(self, ordernumber):
         result = []
+       # print('interface py')
+       # print(self.received_poll_messages)
         for index, item in enumerate(self.received_poll_messages):
             if int(item["ordernumber"]) == ordernumber:
                 result.append(self.received_poll_messages.pop(index))
@@ -1143,7 +1145,7 @@ class GatewayHandler:
         if not fifos_ok:
             raise IOError("ERROR >>>>>> Did you start the SFBGateway.app?")
         else:
-            log(10, "GATEWAY_HANDLER", "FiFo´s initialized")
+            log(10, "GATEWAY_HANDLER", "FiFo initialized")
 
         # signal.signal(signal.SIGINT, self.signal_handler)
 
@@ -1164,6 +1166,7 @@ class GatewayHandler:
             try:
                 fifo = open(RX_FIFO, "rb")
                 data = fifo.read()
+               # print('rx loop',str(data))
                 fifo.close()
                 packets = data.split(b"\r\n")
             except IOError as err:
